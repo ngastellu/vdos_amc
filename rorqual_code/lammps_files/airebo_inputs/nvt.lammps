@@ -1,0 +1,60 @@
+units metal
+   
+boundary f f f
+atom_style atomic
+
+read_data carbon.data
+neighbor 2.0 bin
+neigh_modify every 1
+
+
+pair_style airebo 3.0
+pair_coeff * * CH.airebo C
+
+# Fix carbon atoms at the edges of the structure (within 1 angstrom of max x- and y-coords)
+group carbon_atoms type 1
+variable xmax equal bound(carbon_atoms,xmax)-1.0
+variable xmin equal bound(carbon_atoms,xmin)+1.0
+variable ymax equal bound(carbon_atoms,ymax)-1.0
+variable ymin equal bound(carbon_atoms,ymin)+1.0
+
+# Define edge regions
+region left_edge block INF ${xmin} INF INF INF INF units box
+region right_edge block ${xmax} INF INF INF INF INF units box
+region top_edge block INF INF ${ymax} INF INF INF units box
+region bottom_edge block INF INF INF ${ymin} INF INF units box
+
+# Define atoms groups to the edge regions
+group gleft region left_edge
+group gright region right_edge
+group gtop region top_edge
+group gbottom region bottom_edge
+
+
+group xedges union gleft gright
+group yedges union gtop gbottom
+group fixed_atoms union xedges yedges
+
+
+velocity fixed_atoms set 0.0 0.0 0.0
+fix freeze fixed_atoms setforce 0.0 0.0 0.0
+
+
+# Run MD
+group mobile_atoms subtract all fixed_atoms
+velocity mobile_atoms create 300 42
+fix 1 mobile_atoms nvt temp 300 300 0.01
+
+timestep 0.0005
+
+thermo     1
+thermo_style custom step pe temp
+thermo_modify flush yes
+
+# Save trajectory file for visualization
+dump dump1 all custom 100 dump.lammpstrj id type x y z vx vy vz 
+
+# Save atomic pos and vels of mobile atoms for VDOS calc
+dump vacf all custom 1 vacf.lammpstrj id type x y z vx vy vz 
+
+run 100000

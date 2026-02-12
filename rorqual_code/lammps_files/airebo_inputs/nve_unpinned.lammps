@@ -1,0 +1,32 @@
+units metal
+   
+boundary f f f
+atom_style atomic
+
+read_data carbon.data
+read_dump dump_nvt_unpinned.lammpstrj 100000 x y z vx vy vz box yes
+neighbor 2.0 bin
+neigh_modify every 1
+
+
+pair_style airebo 3.0
+pair_coeff * * CH.airebo C
+
+
+# Run MD
+fix 1 all nve
+
+timestep 0.0001
+
+#compute vcf mobile_atoms vacf
+
+thermo     1
+thermo_style custom step pe ke etotal temp
+thermo_modify flush yes
+
+# Save trajectory file for visualization
+dump dump50 all custom 50 dump_nve_unpinned-50.lammpstrj element x y z vx vy vz 
+dump_modify dump50 element C
+
+
+run 5000000
