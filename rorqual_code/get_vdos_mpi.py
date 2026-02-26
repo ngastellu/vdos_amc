@@ -45,8 +45,16 @@ step = int(sys.argv[4])
 start_file = int(sys.argv[5])
 step_file = int(sys.argv[6])
 
-neglect_edge = True
+neglect_edge = False
+two_dims = True
 
+run_label = ""
+if neglect_edge:
+    run_label += "_neglect_near_edge"
+if two_dims:
+    run_label += "_2d"
+
+outdir = f"mpi_vdos{run_label}"
 
 time_start = perf_counter()
 
@@ -66,6 +74,7 @@ else:
 
 if neglect_edge == True:
 
+
     frame0 = next(stream_lammps_traj(dump, 
                                 start = start_file, 
                                 end=start_file + step_file, 
@@ -75,21 +84,31 @@ if neglect_edge == True:
                                 step_file=step_file,
                                 atom_indices=proc_atoms))
 
-    pos0 = frame0[:,:3]
-    vels0 = frame0[:,3:]
+    if two_dims: 
+        pos0 = frame0[:,:2]
+        vels0 = frame0[:,3:5]
+    else:
+        pos0 = frame0[:,:3]
+        vels0 = frame0[:,3:]
 
     vdos_mask = get_compute_mask(pos0, vels0)
-    outdir = 'mpi_vdos_negelect_near_edge'
+    # outdir = Path('mpi_vdos_neglect_near_edge')
 
 else:
     vdos_mask = np.ones(proc_atoms.shape[0])
-    outdir = 'mpi_vdos'
+    # outdir = Path('mpi_vdos')
 
 ncompute = vdos_mask.sum()
+
+if two_dims:
+    stream_cols = slice(4,6)
+else:
+    stream_cols = slice(4,7)
+
 frames_gen = stream_lammps_traj(dump,start=start,
                                 end=end,
                                 step=step,
-                                stream_cols=slice(4,7),
+                                stream_cols=stream_cols,
                                 start_file=start_file,
                                 step_file=step_file,
                                 atom_indices=proc_atoms)

@@ -45,4 +45,4 @@ for i in $(seq 1 $(( $nb_subsamples - 1))) ; do
 	cd -
 done
 
-python ~/scratch/graphene_MD_obc/python_scripts/average_sample_vdos.py $L
+python ~/scratch/graphene_MD_obc/python_scripts/average_sample_vdos.py $L $run_type
