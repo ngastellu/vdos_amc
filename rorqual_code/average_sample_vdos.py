@@ -12,11 +12,15 @@ run_type = sys.argv[2]
 workdir = Path(subsample_size)
 
 
-assert run_type.strip() in ['pinned', 'unpinned', 'neglect-edge'], f'Invalid value of run_type arg: {run_type}. Must be "pinned" or "unpinned".'
+valid_run_types = ['pinned', 'unpinned', 'neglect-edge', '2d']
+assert run_type.strip() in valid_run_types, f'Invalid value of run_type arg: {run_type}. Must be one of the following:\n{"\n- ".join(valid_run_types)}'
+
 if run_type == 'pinned':
     vdos_npy_prefix = f'vdos_qcnico_mpi'
 elif run_type == 'unpinned':
     vdos_npy_prefix = f'vdos_qcnico_mpi_unpinned'
+elif run_type == '2d':
+    vdos_npy_prefix = 'vdos_qcnico_mpi_2d'
 else:
     vdos_npy_prefix = f'vdos_qcnico_mpi_neglect_near_edge'
 

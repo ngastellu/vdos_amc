@@ -6,12 +6,15 @@ from pathlib import Path
 
 
 run_type = sys.argv[1]
-assert run_type.strip() in ['pinned', 'unpinned', 'neglect-edge'], f'Invalid value of run_type arg: {run_type}. Must be "pinned" or "unpinned".'
+valid_run_types = ['pinned', 'unpinned', 'neglect-edge', '2d']
+assert run_type.strip() in valid_run_types, f'Invalid value of run_type arg: {run_type}. Must be one of the following:\n{"\n- ".join(valid_run_types)}'
 
 if run_type == 'pinned':
     vdos_dir = Path('mpi_vdos/')
 elif run_type == 'unpinned':
     vdos_dir = Path('mpi_vdos_unpinned/')
+elif run_type == '2d':
+    vdos_dir = Path('mpi_vdos_2d')
 else:
     vdos_dir = Path('mpi_vdos_neglect_near_edge')
 
@@ -38,6 +41,8 @@ if run_type == 'pinned':
     outname = f'vdos_qcnico_mpi-{nn}-{natoms_tot}.npy'
 elif run_type == 'unpinned':
     outname = f'vdos_qcnico_mpi_unpinned-{nn}-{natoms_tot}.npy'
+elif run_type == '2d':
+    outname = f'vdos_qcnico_mpi_2d-{nn}-{natoms_tot}.npy'
 else:
     outname = f'vdos_qcnico_mpi_neglect_near_edge-{nn}-{natoms_tot}.npy'
 
